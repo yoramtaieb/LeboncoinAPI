@@ -10,8 +10,14 @@ const routes = require('./routes');
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 
-// ici on appelle les routes du dossier routes
+// Ici on appelle les routes du dossier routes
 server.use(morgan('dev'));
 server.use(routes);
+
+// Gestion des erreurs
+const { notFoundHandler, errorLogger, errorHandler } = require('./src/middlewares');
+server.use('*', notFoundHandler);
+server.use(errorLogger);
+server.use(errorHandler);
 
 module.exports = server;

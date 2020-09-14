@@ -4,7 +4,6 @@ const router = express.Router();
 const signUpRouter = require('./signUpRouter');
 const bodyParser = require('body-parser');
 
-
 // Middleware
 router.use(bodyParser.json());
 
