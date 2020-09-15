@@ -12,7 +12,7 @@ server.use(bodyParser.urlencoded({ extended: true }));
 
 // Ici on appelle les routes du dossier routes
 server.use(morgan('dev'));
-server.use(routes);
+server.use('/leboncoin', routes);
 
 // Gestion des erreurs
 const { notFoundHandler, errorLogger, errorHandler } = require('./src/middlewares');

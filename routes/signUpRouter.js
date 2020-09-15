@@ -1,11 +1,14 @@
 const express = require('express');
-//require("express-async-errors");
 const signUpRouter = express.Router();
+require('express-async-errors');
 const bodyParser = require('body-parser');
+const userController = require('../src/controllers/User');
 
-// Route Login
-signUpRouter.get('/signup', (req, res) => {
-  res.json({ message: 'je suis la route signup' });
+signUpRouter.get('/signup', (request, response) => {
+  response.json({ message: 'je suis la route signup' });
 });
 
+signUpRouter.post('/signup', userController.signUp);
+
 module.exports = signUpRouter;
+

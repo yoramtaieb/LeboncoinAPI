@@ -1,18 +1,20 @@
 const express = require('express');
-// require('express-async-errors');
+require('express-async-errors');
 const router = express.Router();
 const signUpRouter = require('./signUpRouter');
+const signInRouter = require('./signInRouter');
 const bodyParser = require('body-parser');
 
 // Middleware
 router.use(bodyParser.json());
 
 //Page accueil
-router.get('/leboncoin', (request, response) => {
+router.get('/', (request, response) => {
   response.json({ message: 'je suis la page d\'accueil' });
 });
 
 // Routes
-router.use('/leboncoin', signUpRouter);
+router.use(signUpRouter);
+router.use(signInRouter);
 
 module.exports = router;

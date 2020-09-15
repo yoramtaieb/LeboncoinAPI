@@ -3,7 +3,7 @@ require('express-async-errors');
 const bcrypt = require('bcrypt');
 
 const model = require('../../models');
-// const jwtUtils = require('../../utils/jwt');
+const jwtUtils = require('../../utils/jwt');
 const User = model.User;
 
 const {
@@ -71,5 +71,38 @@ module.exports = {
         );
       }
     }
-  }
+  },
+
+  signIn: async (request, response) => {
+    const { email, password } = request.body;
+
+    if (email === '' || password === '') {
+      throw new BadRequestError('Mauvaise requête', 'Les champs ne sont pas renseignés');
+    } else {
+      const userFound = await User.findOne({ where: { email: email } });
+      console.log(userFound)
+      if (userFound) {
+        bcrypt.compare(password, userFound.password, (error, resByScript) => {
+          if (resByScript) {
+            response.status(OK).json({
+              user: {
+                email: userFound.email,
+                firstName: userFound.firstName,
+                lastName: userFound.lastName,
+                role: userFound.role,
+              },
+              token: jwtUtils.genToken(userFound),
+            });
+          } else {
+            throw new UnAuthorizedError(
+              'Accès non autorisé',
+              "Votre mot de passe n'est pas correct"
+            );
+          }
+        });
+      } else {
+        throw new ServerError('Erreur serveur', 'impossible de vérifier cet utilisateur');
+      }
+    }
+  },
 };
