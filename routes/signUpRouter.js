@@ -1,7 +1,6 @@
 const express = require('express');
 const signUpRouter = express.Router();
 require('express-async-errors');
-const bodyParser = require('body-parser');
 const userController = require('../src/controllers/User');
 
 signUpRouter.get('/signup', (request, response) => {

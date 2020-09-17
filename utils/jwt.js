@@ -22,18 +22,16 @@ module.exports = {
 
       jwt.verify(token, secret, (err, user) => {
         if (err) {
-          throw new UnAuthorizedError(
-            'Accès refusé',
-            'Vous devez être connecté pour accéder à cette ressource'
-          );
+          throw new BadRequestError('Mauvaise requête', "le token n'as pas été fournit");
         }
-
         req.user = user;
-
         next();
       });
     } else {
-      throw new BadRequestError('Mauvaise requête', "le token n'as pas été fournit");
+      throw new UnAuthorizedError(
+        'Accès refusé',
+        'Vous devez être connecté pour accéder à cette ressource'
+      );
     }
   },
 };
