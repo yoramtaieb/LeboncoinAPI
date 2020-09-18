@@ -5,15 +5,18 @@ const jwt = require('../utils/jwt')
 
 const {BadRequestError, NotFoundError, UnAuthorizedError } = require('../src/helpers/errors');
 const { CREATED, OK } = require('../src/helpers/status_code');
-const { getAllProduct, getProduct, addProduct } = require('../src/controllers/Product');
+const { addProduct, getAllProduct, getProduct, updateProduct } = require('../src/controllers/Product');
+const { getCityById} = require('../src/controllers/Cities');
+const { up } = require('../migrations/20200914095851-create-product-category');
 
 const NOSTRING_REGEX = /^\d+$/;
 
 productRouter.get('/product', async (request, response) => {
   const product = await getAllProduct();
-  response.status(OK).json(books);
+  response.status(OK).json(product);
 });
 
+// Récupérer un produit par le nom
 productRouter.get('/product/:name', async (request, response) => {
   const product = await getProduct(request.params.name);
   if (!product) {
@@ -22,6 +25,7 @@ productRouter.get('/product/:name', async (request, response) => {
   response.status(OK).json(product);
 });
 
+// Poster un produit 
 productRouter.post('/product', jwt.authenticateJWT, async (request, response) => {
     const { price, description, role } = request.body;
     if (role === 'acheteur') {
@@ -35,16 +39,21 @@ productRouter.post('/product', jwt.authenticateJWT, async (request, response) =>
     }
     
     const newProduct = await addProduct(request.body);
+    const cityFound = await getCityById(request.body.idCity)
 
     return response.status(CREATED).json({
       id: newProduct.id,
-      idCity: newProduct.idCity,
+      // idCity: newProduct.idCity,
+      city: cityFound.name,
       name: newProduct.name,
       description: newProduct.description,
       price: newProduct.price,
     });
-  },
-);
+  })
+
+  // Modifier un produit 
+productRouter.patch('/product/edit/:id', updateProduct)
+
 
 
 

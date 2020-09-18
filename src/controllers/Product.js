@@ -1,5 +1,5 @@
 const models = require('../../models');
-const { Product } = models;
+const { Product, Cities } = models;
 
 const productAttributes = [
   'idCity',
@@ -10,12 +10,7 @@ const productAttributes = [
 
 module.exports = {
   addProduct: (data) => {
-    const {
-        idCity,
-        name,
-        description,
-        price,
-    } = data;
+    const { idCity, name, description, price } = data;
 
   return Product.create({
         idCity,
@@ -24,7 +19,7 @@ module.exports = {
         price,
     });
   },
- 
+
   getAllProduct: () => {
     return Product.findAll({
       attributes: productAttributes,
@@ -38,10 +33,39 @@ module.exports = {
     });
   },
 
-  deleteProduct: (name) => {
-    return Product.destroy({
-      where: { name: name },
-    });
-  },
+  updateProduct: async (request, response) => {
+    const product = {
+      id: request.params.id,
+      name: request.body.name,
+      description: request.body.description,
+      price: request.body.price
+    }
+    const isFounded = await models.Product.findOne({
+      where:{
+        id: product.id,
+      }
+    })
+    if(isFounded){
+      await models.Product.update({
+        name: product.name,
+        description: product.description,
+        price: product.price
+      },
+      {where: {id: product.id}}
+      )
+        return response.status(200).json({
+        message: 'le produit a bien été modifié', 
+        productUpdated: product.name, 
+        productUpdated: product.description, 
+        productUpdated: product.price
+      })
+    }}
+  
 
-}
+  // deleteProduct: (name) => {
+  //   return Product.destroy({
+  //     where: { name: name },
+  //   });
+  // },
+
+  }

@@ -8,9 +8,26 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
+      idUser: {
+        type: Sequelize.INTEGER,
+        // defaultValue: 0,
+        references: {
+          allowNull: false,
+          model: {
+            tableName: 'Users',
+          },
+          key: 'id',
+        },
+      },
       idCity: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        references: {
+          allowNull: false,
+          model: {
+            tableName: 'Cities',
+          },
+          key: 'id',
+        },
       },
       name: {
         type: Sequelize.STRING
