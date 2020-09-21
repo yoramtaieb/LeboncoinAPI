@@ -4,10 +4,9 @@ const productRouter = express.Router();
 const jwt = require('../utils/jwt')
 
 const {BadRequestError, NotFoundError, UnAuthorizedError } = require('../src/helpers/errors');
-const { CREATED, OK } = require('../src/helpers/status_code');
-const { addProduct, getAllProduct, getProduct, updateProduct } = require('../src/controllers/Product');
+const { CREATED, OK, NO_CONTENT } = require('../src/helpers/status_code');
+const { addProduct, getAllProduct, getProduct, updateProduct, deleteProduct } = require('../src/controllers/Product');
 const { getCityById} = require('../src/controllers/Cities');
-const { up } = require('../migrations/20200914095851-create-product-category');
 
 const NOSTRING_REGEX = /^\d+$/;
 
@@ -43,7 +42,6 @@ productRouter.post('/product', jwt.authenticateJWT, async (request, response) =>
 
     return response.status(CREATED).json({
       id: newProduct.id,
-      // idCity: newProduct.idCity,
       city: cityFound.name,
       name: newProduct.name,
       description: newProduct.description,
@@ -52,9 +50,20 @@ productRouter.post('/product', jwt.authenticateJWT, async (request, response) =>
   })
 
   // Modifier un produit 
-productRouter.patch('/product/edit/:id', updateProduct)
+productRouter.patch('/product/edit/:id', jwt.authenticateJWT, updateProduct, (request, response) =>{
+  const { role } = request.body.role;
+    if (role == acheteur) {
+      throw new UnAuthorizedError(
+        'Accès non autorisé',
+        'Vous devez être vendeur pour modifer un produit',
+      );
+    }
+})
 
-
-
+// Supprimer un produit
+productRouter.delete('/product/:productId', async (request, response) => {
+  const productDeleted = await deleteProduct(request.params.productId);
+  return response.status(NO_CONTENT).json();
+});
 
 module.exports = productRouter;

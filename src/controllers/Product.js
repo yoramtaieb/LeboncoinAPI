@@ -59,13 +59,14 @@ module.exports = {
         productUpdated: product.description, 
         productUpdated: product.price
       })
-    }}
+    }},
   
-
-  // deleteProduct: (name) => {
-  //   return Product.destroy({
-  //     where: { name: name },
-  //   });
-  // },
-
+    deleteProduct: async (productId) => {
+      return Product.destroy({
+        where: {
+          id: productId
+        },
+      });
+    },
+    
   }
