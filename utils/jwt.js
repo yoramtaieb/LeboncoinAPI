@@ -10,7 +10,8 @@ module.exports = {
         userId: userData.id,
         userRole: userData.role,
       },
-      secret
+      secret,
+      { expiresIn: '20h'},
     );
   },
 
@@ -19,7 +20,6 @@ module.exports = {
 
     if (authHeader) {
       const token = authHeader.split(' ')[1];
-
       jwt.verify(token, secret, (err, user) => {
         if (err) {
           throw new BadRequestError('Mauvaise requête', "le token n'as pas été fournit");

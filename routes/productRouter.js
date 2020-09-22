@@ -2,14 +2,14 @@ const express = require('express');
 require('express-async-errors');
 const productRouter = express.Router();
 const jwt = require('../utils/jwt')
-
-const {BadRequestError, NotFoundError, UnAuthorizedError } = require('../src/helpers/errors');
-const { CREATED, OK, NO_CONTENT } = require('../src/helpers/status_code');
+const {BadRequestError, NotFoundError, ForbiddenError } = require('../src/helpers/errors');
+const { CREATED, OK } = require('../src/helpers/status_code');
 const { addProduct, getAllProduct, getProduct, updateProduct, deleteProduct } = require('../src/controllers/Product');
-const { getCityById} = require('../src/controllers/Cities');
+const { getCityById } = require('../src/controllers/Cities');
 
 const NOSTRING_REGEX = /^\d+$/;
 
+// Récupérer tous les produits
 productRouter.get('/product', async (request, response) => {
   const product = await getAllProduct();
   response.status(OK).json(product);
@@ -18,19 +18,20 @@ productRouter.get('/product', async (request, response) => {
 // Récupérer un produit par le nom
 productRouter.get('/product/:name', async (request, response) => {
   const product = await getProduct(request.params.name);
-  if (!product) {
+  if(!product) {
     throw new NotFoundError('Ressource introuvable',"Ce produit n'existe pas");
   }
   response.status(OK).json(product);
 });
 
-// Poster un produit 
+// Ajouter un produit
 productRouter.post('/product', jwt.authenticateJWT, async (request, response) => {
-    const { price, description, role } = request.body;
-    if (role === 'acheteur') {
+    const { price, description } = request.body;
+    const { userRole } = request.user
+    if(userRole === 'Acheteur') {
       throw new ForbiddenError();
     }
-    if (!NOSTRING_REGEX.test(price)) {
+    if(!NOSTRING_REGEX.test(price)) {
       throw new BadRequestError('Mauvaise requête', 'Le champ doit être un nombre entier');
     }
     if (description === null || description === undefined || description === '') {
@@ -49,21 +50,10 @@ productRouter.post('/product', jwt.authenticateJWT, async (request, response) =>
     });
   })
 
-  // Modifier un produit 
-productRouter.patch('/product/edit/:id', jwt.authenticateJWT, updateProduct, (request, response) =>{
-  const { role } = request.body.role;
-    if (role == acheteur) {
-      throw new UnAuthorizedError(
-        'Accès non autorisé',
-        'Vous devez être vendeur pour modifer un produit',
-      );
-    }
-})
+// Modifier un produit
+productRouter.patch('/product/edit/:id', jwt.authenticateJWT, updateProduct)
 
 // Supprimer un produit
-productRouter.delete('/product/:productId', async (request, response) => {
-  const productDeleted = await deleteProduct(request.params.productId);
-  return response.status(NO_CONTENT).json();
-});
+productRouter.delete('/product/:id', jwt.authenticateJWT, deleteProduct)
 
 module.exports = productRouter;

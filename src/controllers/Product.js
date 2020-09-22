@@ -1,5 +1,10 @@
+const express = require('express');
+require('express-async-errors');
 const models = require('../../models');
-const { Product, Cities } = models;
+const { Product } = require('../../models');
+const jwt = require('../../utils/jwt')
+const { UNAUTHORIZED, OK } = require('../../src/helpers/status_code');
+const { ForbiddenError, NotFoundError } = require('../../src/helpers/errors');
 
 const productAttributes = [
   'idCity',
@@ -9,6 +14,7 @@ const productAttributes = [
 ];
 
 module.exports = {
+  // Ajouter un produit
   addProduct: (data) => {
     const { idCity, name, description, price } = data;
 
@@ -20,12 +26,14 @@ module.exports = {
     });
   },
 
+  // Récupérer tous les produits
   getAllProduct: () => {
     return Product.findAll({
       attributes: productAttributes,
     });
   },
 
+  // Récupérer un produit par le nom
   getProduct: (name) => {
     return Product.findOne({
       where: { name: name },
@@ -33,7 +41,12 @@ module.exports = {
     });
   },
 
+  // Modifier un produit
   updateProduct: async (request, response) => {
+    const { userRole } = request.user
+    if(userRole === 'Acheteur') {
+      throw new ForbiddenError();
+    }
     const product = {
       id: request.params.id,
       name: request.body.name,
@@ -53,20 +66,43 @@ module.exports = {
       },
       {where: {id: product.id}}
       )
-        return response.status(200).json({
-        message: 'le produit a bien été modifié', 
+        return response.status(OK).json({
+        message: 'Le produit a bien été modifié', 
         productUpdated: product.name, 
         productUpdated: product.description, 
         productUpdated: product.price
       })
     }},
   
-    deleteProduct: async (productId) => {
-      return Product.destroy({
-        where: {
-          id: productId
-        },
-      });
-    },
-    
+    // Supprimer un produit
+    deleteProduct: async (request, response) =>{
+      const { userRole } = request.user
+      if(userRole === 'Acheteur') {
+        throw new ForbiddenError();
+      }
+      const product = {
+        id: request.params.id
+      }
+      if(!product.id){
+        response.status(UNAUTHORIZED).json({
+          error: 'Vous n\'êtes pas autorisé à accéder à cette ressource'
+        })
+      }
+      const isFounded = await models.Product.findOne({
+        where:{
+          id: product.id,
+        }
+      })
+      if(isFounded){
+        await models.Product.destroy({
+          where: {
+            id: product.id
+          }
+        })
+        return response.status(OK).json({ 
+          message: 'Votre produit a bien été supprimé', 
+          productDeleted: product.id,
+        })
+      }
+    }
   }
