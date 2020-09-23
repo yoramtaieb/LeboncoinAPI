@@ -1,5 +1,5 @@
 'use strict';
-const Faker = require('../seeds/Cities');
+const Faker = require('../seeds/cities');
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {

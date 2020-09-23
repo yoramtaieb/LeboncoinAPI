@@ -1,9 +1,9 @@
 const db = require('../../models');
-const { Cities } = db;
+const { Categorie } = db;
 
 module.exports = {
-  getCityById: (id) => {
-    return Cities.findByPk(id, {
+  getCategorieById: (id) => {
+    return Categorie.findByPk(id, {
       attributes: ['name'],
     });
   },

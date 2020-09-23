@@ -22,11 +22,18 @@ module.exports = (sequelize, DataTypes) => {
           name: 'idUser',
         },
       })
+
+      this.belongsTo(models.ProductCategory,{
+        foreignKey: {
+          name: 'idCategory',
+        },
+      })
       
     }
   };
   Product.init({
     idUser: DataTypes.INTEGER,
+    idCategory: DataTypes.INTEGER,
     idCity: DataTypes.INTEGER,
     name: DataTypes.STRING,
     description: DataTypes.TEXT,

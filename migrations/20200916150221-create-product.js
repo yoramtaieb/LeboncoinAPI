@@ -10,11 +10,20 @@ module.exports = {
       },
       idUser: {
         type: Sequelize.INTEGER,
-        // defaultValue: 0,
         references: {
           allowNull: false,
           model: {
             tableName: 'Users',
+          },
+          key: 'id',
+        },
+      },
+      idCategory:{
+        type: Sequelize.INTEGER,
+        references: {
+          allowNull: false,
+          model: {
+            tableName: 'ProductCategories',
           },
           key: 'id',
         },

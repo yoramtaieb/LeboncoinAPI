@@ -8,6 +8,7 @@ const { ForbiddenError, NotFoundError } = require('../../src/helpers/errors');
 
 const productAttributes = [
   'idCity',
+  'idCategory',
   'name',
   'description',
   'price',
@@ -16,10 +17,10 @@ const productAttributes = [
 module.exports = {
   // Ajouter un produit
   addProduct: (data) => {
-    const { idCity, name, description, price } = data;
-
-  return Product.create({
+    const { idCity, idCategory, name, description, price } = data;
+    return Product.create({
         idCity,
+        idCategory,
         name,
         description,
         price,
@@ -27,14 +28,14 @@ module.exports = {
   },
 
   // Récupérer tous les produits
-  getAllProduct: () => {
+  getAllProduct: (request, response) => {
     return Product.findAll({
       attributes: productAttributes,
     });
   },
 
   // Récupérer un produit par le nom
-  getProduct: (name) => {
+  getProductByName: (name) => {
     return Product.findOne({
       where: { name: name },
       attributes: productAttributes,
@@ -44,6 +45,7 @@ module.exports = {
   // Modifier un produit
   updateProduct: async (request, response) => {
     const { userRole } = request.user
+    const { id } = request.body
     if(userRole === 'Acheteur') {
       throw new ForbiddenError();
     }
@@ -64,7 +66,9 @@ module.exports = {
         description: product.description,
         price: product.price
       },
-      {where: {id: product.id}}
+      {
+        where: { id: product.id}
+      },
       )
         return response.status(OK).json({
         message: 'Le produit a bien été modifié', 
@@ -72,11 +76,18 @@ module.exports = {
         productUpdated: product.description, 
         productUpdated: product.price
       })
-    }},
+    } else if(id === null || id === undefined || id === ''){
+      throw new NotFoundError(
+        'Erreur de conflit',
+        'Ce produit n\'existe pas 🙅‍♂️'
+      );
+    }
+    },
   
     // Supprimer un produit
     deleteProduct: async (request, response) =>{
       const { userRole } = request.user
+      const { id } = request.body
       if(userRole === 'Acheteur') {
         throw new ForbiddenError();
       }
@@ -100,9 +111,11 @@ module.exports = {
           }
         })
         return response.status(OK).json({ 
-          message: 'Votre produit a bien été supprimé', 
+          message: 'Votre produit a bien été supprimé 👍', 
           productDeleted: product.id,
         })
+      } else if(id === null || id === undefined || id === ''){
+        throw new NotFoundError('Erreur de conflit', 'Ce produit n\'existe pas 🙅‍♂️');
       }
     }
   }
