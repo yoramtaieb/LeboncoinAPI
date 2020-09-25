@@ -3,7 +3,7 @@ const userRouter = express.Router();
 require('express-async-errors');
 const jwt = require('../utils/jwt')
 const bodyParser = require('body-parser');
-const { getAllUsers, getUserById, updateUser } = require('../src/controllers/User');
+const { getAllUsers, getUserById, updateUser, deleteUser } = require('../src/controllers/User');
 const { OK } = require('../src/helpers/status_code');
 const { NotFoundError } = require('../src/helpers/errors');
 
@@ -28,4 +28,7 @@ userRouter.get('/users/:id', async (request, response)=>{
 // Modifier un utilisateur
 userRouter.patch('/user/edit/:id', jwt.authenticateJWT, updateUser)
 
+// Supprimer un utilisateur
+userRouter.delete('/user/delete/:id', deleteUser)
+// jwt.authenticateJWT,
 module.exports = userRouter;

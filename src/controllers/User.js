@@ -117,6 +117,9 @@ module.exports = {
   // Modifier un utilisateur
   updateUser: async (request, response) => {   
     const { id } = request.body
+    if(id === null || id === undefined || id === ''){
+      throw new NotFoundError('Erreur de conflit', 'Cet utilisateur n\'existe pas 🙅‍♂️');
+    }
     const user = {
         id: request.params.id,
         email: request.body.email,
@@ -142,15 +145,45 @@ module.exports = {
          }
        })
        return response.status(OK).json({ 
-          message: "Votre profil a été mis à jour", 
+          message: "Votre profil a bien été mis à jour $👍", 
           emailUpdated: user.email,
           passwordUpdated: user.password,
           cityUpdated: user.city
         })
       })
     } 
-    if(id === null || id === undefined || id === ''){
-      throw new NotFoundError('Erreur de conflit', 'Cet utilisateur n\'existe pas 🙅‍♂️');
+  },
+
+  // Supprimer un utilisateur
+  deleteUser: async (request, response) =>{
+    const { id } = request.body
+    const user = {
+      id: request.params.id
+    }
+    if(!user.id){
+      response.status(UNAUTHORIZED).json({
+        error: 'Vous n\'êtes pas autorisé à accéder à cette ressource'
+      })
+    }
+    const isFounded = await model.User.findOne({
+      where:{
+        id: user.id,
+      }
+    })
+    if(isFounded){
+      await model.User.destroy({
+        where: {
+          id: user.id
+        }
+      })
+      return response.status(OK).json({ 
+        message: 'Votre compte a bien été supprimé 👍', 
+        userDeleted: user.id,
+      })
+    } else if(id === null || id === undefined || id === ''){
+      throw new NotFoundError('Erreur de conflit', 'Ce user n\'existe pas 🙅‍♂️');
     }
   }
 }
+
+
