@@ -4,11 +4,24 @@ const bcrypt = require('bcrypt');
 const model = require('../../models');
 const jwtUtils = require('../../utils/jwt');
 const User = model.User;
-const { BadRequestError, ConflictError, UnAuthorizedError, ServerError } = require('../helpers/errors');
+const { BadRequestError, ConflictError, UnAuthorizedError, ServerError, NotFoundError } = require('../helpers/errors');
 const { OK, CREATED } = require('../helpers/status_code');
+const { request } = require('express');
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const PASSWORD_REGEX = /^(?=.*\d).{4,8}$/;
 const FIRSTNAME_REGEX = /^[a-zA-Z]{1,}$/;
+
+const userAttributes = [
+  'id',
+  'firstName', 
+  'lastName', 
+  'email', 
+  'password', 
+  'city', 
+  'description', 
+  'birthday', 
+  'role' 
+];
 
 module.exports = {
   signUp: async (request, response) => {
@@ -41,10 +54,7 @@ module.exports = {
           response.status(CREATED).json(newUser);
         });
       } else {
-        throw new ConflictError(
-          'Erreur de conflit',
-          'Un utilisateur utilisant cette adresse email est déjà enregistré 🙆‍♂️'
-        );
+        throw new ConflictError('Erreur de conflit', 'Un utilisateur utilisant cette adresse email est déjà enregistré 🙆‍♂️');
       }
     }
   },
@@ -80,4 +90,67 @@ module.exports = {
       }
     }
   },
-};
+
+  // Récupérer tous les utilisateurs
+  getAllUsers: (request, response) => {
+    return User.findAll({
+      attributes: userAttributes,
+    });
+  },
+
+  // Récupérer tous les utilisateurs par l'id
+  getUserById: (id) => {
+    return User.findByPk(id, {
+      attributes: [
+        'firstName', 
+        'lastName', 
+        'email', 
+        'password', 
+        'city', 
+        'description', 
+        'birthday', 
+        'role' 
+      ],
+    });
+  },
+
+  // Modifier un utilisateur
+  updateUser: async (request, response) => {   
+    const { id } = request.body
+    const user = {
+        id: request.params.id,
+        email: request.body.email,
+        password: request.body.password,              
+        city: request.body.city
+    }
+   const isFounded = await model.User.findOne({
+       where: {
+           id: user.id
+       }
+   })
+   if(isFounded) {
+     bcrypt.hash(user.password, 5, async (err, hash)=>{
+       user.password = hash;
+       await model.User.update({
+         email: user.email,
+         password: user.password,
+         city: user.city
+       },
+       {
+         where: {
+           id: user.id
+         }
+       })
+       return response.status(OK).json({ 
+          message: "Votre profil a été mis à jour", 
+          emailUpdated: user.email,
+          passwordUpdated: user.password,
+          cityUpdated: user.city
+        })
+      })
+    } 
+    if(id === null || id === undefined || id === ''){
+      throw new NotFoundError('Erreur de conflit', 'Cet utilisateur n\'existe pas 🙅‍♂️');
+    }
+  }
+}

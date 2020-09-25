@@ -5,6 +5,7 @@ const { Product } = require('../../models');
 const jwt = require('../../utils/jwt')
 const { UNAUTHORIZED, OK } = require('../../src/helpers/status_code');
 const { ForbiddenError, NotFoundError } = require('../../src/helpers/errors');
+const Categories = require('./Categories');
 
 const productAttributes = [
   'idCity',
@@ -42,6 +43,22 @@ module.exports = {
     });
   },
 
+// Récupérer tous les produits d'une catégorie
+  getProductByCategories: (idCategory) =>{
+    return Product.findAll({
+      where: { idCategory: idCategory },
+      attributes: productAttributes
+    })
+  },
+
+// Récupérer tous les produits d'une région
+  getProductByCities: (idCity) =>{
+    return Product.findAll({
+      where: { idCity: idCity },
+      attributes: productAttributes
+    })
+  },
+
   // Modifier un produit
   updateProduct: async (request, response) => {
     const { userRole } = request.user
@@ -51,6 +68,8 @@ module.exports = {
     }
     const product = {
       id: request.params.id,
+      idCity: request.body.idCity,
+      idCategory: request.body.idCategory,
       name: request.body.name,
       description: request.body.description,
       price: request.body.price
@@ -62,6 +81,8 @@ module.exports = {
     })
     if(isFounded){
       await models.Product.update({
+        idCity: product.idCity,
+        idCategory: product.idCategory,
         name: product.name,
         description: product.description,
         price: product.price
@@ -71,16 +92,15 @@ module.exports = {
       },
       )
         return response.status(OK).json({
-        message: 'Le produit a bien été modifié', 
+        message: 'Le produit a bien été modifié 👍', 
+        productUpdated: product.idCity, 
+        productUpdated: product.idCategory, 
         productUpdated: product.name, 
         productUpdated: product.description, 
         productUpdated: product.price
       })
     } else if(id === null || id === undefined || id === ''){
-      throw new NotFoundError(
-        'Erreur de conflit',
-        'Ce produit n\'existe pas 🙅‍♂️'
-      );
+      throw new NotFoundError('Erreur de conflit', 'Ce produit n\'existe pas 🙅‍♂️');
     }
     },
   

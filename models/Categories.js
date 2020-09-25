@@ -13,8 +13,6 @@ module.exports = (sequelize, DataTypes) => {
         },
       });
       
-      this.belongsTo(models.ProductCategory)
-      
     }
   };
   Categories.init({

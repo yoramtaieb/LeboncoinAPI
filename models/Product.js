@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       })
 
-      this.belongsTo(models.ProductCategory,{
+      this.belongsTo(models.Categories,{
         foreignKey: {
           name: 'idCategory',
         },

@@ -20,7 +20,7 @@ module.exports = () => {
       },
       {
         id: 4,
-        name: 'Informatique',
+        name: 'Vente Immo',
         createdAt: '2020-07-04',
         updatedAt: '2020-07-04',
       },

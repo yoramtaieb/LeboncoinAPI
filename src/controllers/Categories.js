@@ -1,10 +1,10 @@
 const db = require('../../models');
-const { Categorie } = db;
+const { Categories } = db;
 
 module.exports = {
   getCategorieById: (id) => {
-    return Categorie.findByPk(id, {
+    return Categories.findByPk(id, {
       attributes: ['name'],
     });
-  },
+  }
 };

@@ -6,6 +6,7 @@ const router = express.Router();
 const signUpRouter = require('./signUpRouter');
 const signInRouter = require('./signInRouter');
 const productRouter = require('./productRouter')
+const userRouter = require('./userRouter')
 
 const { OK } = require('../src/helpers/status_code');
 
@@ -17,5 +18,6 @@ router.use(bodyParser.json());
 router.use(signUpRouter);
 router.use(signInRouter);
 router.use(productRouter);
+router.use(userRouter);
 
 module.exports = router;

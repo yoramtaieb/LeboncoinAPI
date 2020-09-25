@@ -6,5 +6,5 @@ module.exports = {
     return Cities.findByPk(id, {
       attributes: ['name'],
     });
-  },
+  }
 };
