@@ -4,9 +4,11 @@ module.exports = (sequelize, DataTypes) => {
   class User extends Model {
   
     static associate(models) {
-     this.hasMany(models.Product,{
-       foreignKey:'idUser'
-     })
+      this.hasMany(models.Product, {
+        foreignKey: {
+          name: 'idUser',
+        },
+      });
     }
   }
   

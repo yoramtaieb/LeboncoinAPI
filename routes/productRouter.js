@@ -7,7 +7,6 @@ const { CREATED, OK } = require('../src/helpers/status_code');
 const { addProduct, getAllProduct, getProductByName, getProductByCategories, getProductByCities, updateProduct, deleteProduct } = require('../src/controllers/Product');
 const { getCityById } = require('../src/controllers/Cities');
 const { getCategorieById } = require('../src/controllers/Categories');
-const { response } = require('express');
 const NOSTRING_REGEX = /^\d+$/;
 
 // Récupérer tous les produits
