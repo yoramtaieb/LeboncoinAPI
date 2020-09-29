@@ -5,8 +5,7 @@ const jwt = require('../utils/jwt')
 const {BadRequestError, NotFoundError, ForbiddenError } = require('../src/helpers/errors');
 const { CREATED, OK } = require('../src/helpers/status_code');
 const { addProduct, getAllProduct, getProductByName, getProductByCategories, getProductByCities, updateProduct, deleteProduct } = require('../src/controllers/Product');
-const { getCityById } = require('../src/controllers/Cities');
-const { getCategorieById } = require('../src/controllers/Categories');
+const { request } = require('express');
 const NOSTRING_REGEX = /^\d+$/;
 
 // Récupérer tous les produits
@@ -47,29 +46,22 @@ productRouter.get('/product/citie/:idCity', async (request, response) => {
 
 // Ajouter un produit
 productRouter.post('/product', jwt.authenticateJWT, async (request, response) => {
-    const { price, description } = request.body;
+    const newProduct = await addProduct(request.body);
+    const {name, description, price } = request.body;
     const { userRole } = request.user
     if(userRole === 'Acheteur') {
       throw new ForbiddenError();
     }
     if(!NOSTRING_REGEX.test(price)) {
-      throw new BadRequestError('Mauvaise requête', 'Le champ doit être un nombre entier');
+      throw new BadRequestError('Mauvaise requête', 'Le champ doit être un nombre entier ❌');
+    }
+    if(name === null || name === undefined || name === '') {
+      throw new BadRequestError('Mauvaise requête', "Le champ name n'est pas renseigné ❌");
     }
     if(description === null || description === undefined || description === '') {
-      throw new BadRequestError('Mauvaise requête', "Le champ description n'est pas renseigné");
+      throw new BadRequestError('Mauvaise requête', "Le champ description n'est pas renseigné ❌");
     }
-
-    const newProduct = await addProduct(request.body);
-    const cityFound = await getCityById(request.body.idCity)
-    const categoryFound = await getCategorieById(request.body.idCategory)
-    return response.status(CREATED).json({
-      id: newProduct.id,
-      city: cityFound.name,
-      categorie: categoryFound.name,
-      name: newProduct.name,
-      description: newProduct.description,
-      price: newProduct.price,
-    });
+    return response.status(CREATED).json(newProduct);
   })
 
 // Modifier un produit

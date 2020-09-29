@@ -6,5 +6,11 @@ module.exports = {
     return Categories.findByPk(id, {
       attributes: ['name'],
     });
-  }
+  },
+
+  getCategorieByName: (name) => {
+    return Categories.findOne({
+      where: { name: name },
+    });
+  },
 };

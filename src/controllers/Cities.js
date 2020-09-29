@@ -6,5 +6,11 @@ module.exports = {
     return Cities.findByPk(id, {
       attributes: ['name'],
     });
-  }
+  },
+  
+  getCityByName: (name) => {
+    return Cities.findOne({
+      where: { name: name },
+    });
+  },
 };

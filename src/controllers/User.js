@@ -98,19 +98,17 @@ module.exports = {
     });
   },
 
+  // Récupérer tous les utilisateurs par le nom
+  getUserByName: (firstName) => {
+    return User.findOne({
+      where: { firstName: firstName },
+    });
+  },
+
   // Récupérer tous les utilisateurs par l'id
   getUserById: (id) => {
     return User.findByPk(id, {
-      attributes: [
-        'firstName', 
-        'lastName', 
-        'email', 
-        'password', 
-        'city', 
-        'description', 
-        'birthday', 
-        'role' 
-      ],
+      attributes: ['firstName'],
     });
   },
 
