@@ -3,9 +3,9 @@ const userRouter = express.Router();
 require('express-async-errors');
 const jwt = require('../utils/jwt')
 const bodyParser = require('body-parser');
-const { getAllUsers, getUserById, updateUser, deleteUser } = require('../src/controllers/User');
-const { OK } = require('../src/helpers/status_code');
-const { NotFoundError } = require('../src/helpers/errors');
+const { getAllUsers, getUserById, updateUser, deleteUser } = require('../../src/controllers/User');
+const { OK } = require('../helpers/status_code');
+const { NotFoundError } = require('../../src/helpers/errors');
 
 // Récupérer tous les utilisateurs
 userRouter.get('/users', async (request, response)=>{
@@ -26,8 +26,8 @@ userRouter.get('/users/:id', async (request, response)=>{
 })
 
 // Modifier un utilisateur
-userRouter.patch('/user/edit/:id', jwt.authenticateJWT, updateUser)
-
+userRouter.patch('/user/edit/:id',  updateUser)
+//jwt.authenticateJWT,
 // Supprimer un utilisateur
 userRouter.delete('/user/delete/:id', jwt.authenticateJWT, deleteUser)
 

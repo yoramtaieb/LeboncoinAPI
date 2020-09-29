@@ -2,11 +2,10 @@ const express = require('express');
 require('express-async-errors');
 const bcrypt = require('bcrypt');
 const model = require('../../models');
-const jwtUtils = require('../../utils/jwt');
+const jwtUtils = require('../utils/jwt');
 const User = model.User;
 const { BadRequestError, ConflictError, UnAuthorizedError, ServerError, NotFoundError } = require('../helpers/errors');
 const { OK, CREATED } = require('../helpers/status_code');
-const { request } = require('express');
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const PASSWORD_REGEX = /^(?=.*\d).{4,8}$/;
 const FIRSTNAME_REGEX = /^[a-zA-Z]{1,}$/;
@@ -92,37 +91,47 @@ module.exports = {
   },
 
   // Récupérer tous les utilisateurs
-  getAllUsers: (request, response) => {
-    return User.findAll({
+  getAllUsers: async (request, response) => {
+    return await User.findAll({
       attributes: userAttributes,
     });
   },
 
   // Récupérer tous les utilisateurs par le nom
-  getUserByName: (firstName) => {
-    return User.findOne({
+  getUserByName: async (firstName) => {
+    return await User.findOne({
       where: { firstName: firstName },
     });
   },
 
   // Récupérer tous les utilisateurs par l'id
-  getUserById: (id) => {
-    return User.findByPk(id, {
+  getUserById: async (id) => {
+    return await User.findByPk(id, {
       attributes: ['firstName'],
     });
   },
 
   // Modifier un utilisateur
   updateUser: async (request, response) => {   
-    const { id } = request.body
-    if(id === null || id === undefined || id === ''){
-      throw new NotFoundError('Erreur de conflit', 'Cet utilisateur n\'existe pas 🙅‍♂️');
+    const { id, email, password, city } = request.body
+    const { userRole } = request.user
+    if(userRole === 'Acheteur') {
+      throw new ForbiddenError();
     }
     const user = {
         id: request.params.id,
         email: request.body.email,
         password: request.body.password,              
         city: request.body.city
+    }
+    if(email === null || email === undefined || email === '') {
+      throw new BadRequestError('Mauvaise requête', "Le champ email n'est pas renseigné ❌");
+    }
+    if(password === null || password === undefined || password === '') {
+      throw new BadRequestError('Mauvaise requête', "Le champ password n'est pas renseigné ❌");
+    }
+    if(city === null || city === undefined || city === '') {
+      throw new BadRequestError('Mauvaise requête', "Le champ city n'est pas renseigné ❌");
     }
    const isFounded = await model.User.findOne({
        where: {
@@ -143,18 +152,24 @@ module.exports = {
          }
        })
        return response.status(OK).json({ 
-          message: "Votre profil a bien été mis à jour $👍", 
+          message: `Votre profil a bien été mis à jour 👍`, 
           emailUpdated: user.email,
           passwordUpdated: user.password,
           cityUpdated: user.city
         })
       })
-    } 
+    } else if(id === null || id === undefined || id === ''){
+        throw new NotFoundError('Erreur de conflit', 'Cet utilisateur n\'existe pas 🙅‍♂️');
+    }
   },
 
   // Supprimer un utilisateur
   deleteUser: async (request, response) =>{
     const { id } = request.body
+    const { userRole } = request.user
+    if(userRole === 'Acheteur') {
+      throw new ForbiddenError();
+    }
     const user = {
       id: request.params.id
     }
@@ -179,7 +194,7 @@ module.exports = {
         userDeleted: user.id,
       })
     } else if(id === null || id === undefined || id === ''){
-      throw new NotFoundError('Erreur de conflit', 'Ce user n\'existe pas 🙅‍♂️');
+      throw new NotFoundError('Erreur de conflit', 'Cet utilisateur n\'existe pas 🙅‍♂️');
     }
   }
 }

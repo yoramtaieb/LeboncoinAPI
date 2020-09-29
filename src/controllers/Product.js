@@ -5,7 +5,7 @@ const { Product, User, Cities, Categories } = require('../../models');
 const { getCityByName } = require('../../src/controllers/Cities');
 const { getCategorieByName } = require('../../src/controllers/Categories');
 const { getUserByName } = require('../../src/controllers/User');
-const jwt = require('../../utils/jwt')
+const jwt = require('../utils/jwt')
 const { UNAUTHORIZED, OK } = require('../../src/helpers/status_code');
 const { ForbiddenError, NotFoundError, BadRequestError } = require('../../src/helpers/errors');
 
@@ -16,8 +16,67 @@ const productAttributes = [
 ];
 
 module.exports = {
-  // Ajouter un produit
-  addProduct: async (data) => {
+  // Récupérer tous les produits
+  getAllProduct: async (request, response) => {
+    return await Product.findAll({
+      attributes: productAttributes,
+      include: [
+        {
+          model: User,
+          attributes: ['firstName']
+        },
+        {
+          model: Cities,
+          attributes: ['name']
+        },
+        {
+          model: Categories,
+          attributes: ['name']
+        }
+      ]
+    });
+  },
+
+  // Récupérer un produit par le nom
+  getProductByName: async (name) => {
+    return await Product.findOne({
+      where: { name: name },
+      attributes: productAttributes,
+    });
+  },
+
+  // Récupérer tous les produits par le nom d'une catégorie
+  getProductByCategorieName: (name) => {
+    return Product.findAll({
+      include: [
+        {
+          model: Categories,
+          attributes: ['name'],
+          where: {
+            name: name
+          },
+        },
+      ],
+    });
+  },
+
+   // Récupérer tous les produits par le nom d'une région
+   getProductByCitieName: (name) => {
+    return Product.findAll({
+      include: [
+        {
+          model: Cities,
+          attributes: ['name'],
+          where: {
+            name: name
+          },
+        },
+      ],
+    });
+  },
+
+   // Ajouter un produit
+   addProduct: async (data) => {
     const userFound = await getUserByName(data.user)
     const cityFound = await getCityByName(data.city)
     const categoryFound = await getCategorieByName(data.categorie)
@@ -58,58 +117,30 @@ module.exports = {
     });
   },
 
-  // Récupérer tous les produits
-  getAllProduct: (request, response) => {
-    return Product.findAll({
-      attributes: productAttributes,
-      include: [
-        {
-          model: User,
-          attributes: ['firstName']
-        },
-        {
-          model: Cities
-        },
-        {
-          model: Categories
-        }
-      ]
-    });
-  },
-
-  // Récupérer un produit par le nom
-  getProductByName: (name) => {
-    return Product.findOne({
-      where: { name: name },
-      attributes: productAttributes,
-    });
-  },
-
-// Récupérer tous les produits d'une catégorie
-  getProductByCategories: (idCategory) =>{
-    return Product.findAll({
-      where: { idCategory: idCategory },
-      attributes: productAttributes
-    })
-  },
-
-// Récupérer tous les produits d'une région
-  getProductByCities: (idCity) =>{
-    return Product.findAll({
-      where: { idCity: idCity },
-      attributes: productAttributes
-    })
-  },
-
   // Modifier un produit
   updateProduct: async (request, response) => {
-    const { id } = request.body
+    const { id, name, description, price } = request.body
     const { userRole } = request.user
     if(userRole === 'Acheteur') {
       throw new ForbiddenError();
     }
+    if(name === null || name === undefined || name === '') {
+      throw new BadRequestError('Mauvaise requête', "Le champ name n'est pas renseigné ❌");
+    }
+    if(description === null || description === undefined || description === '') {
+      throw new BadRequestError('Mauvaise requête', "Le champ description n'est pas renseigné ❌");
+    }
+    if(price === null || price === undefined || price === '') {
+      throw new BadRequestError('Mauvaise requête', "Le champ price doit être un nombre entier ❌");
+    }
     const cityFound = await getCityByName(request.body.city)
     const categoryFound = await getCategorieByName(request.body.categorie)
+    if(cityFound === null || cityFound === undefined || cityFound === '') {
+      throw new BadRequestError('Mauvaise requête', "Le champ city n'est pas renseigné ❌");
+    }
+    if(categoryFound === null || categoryFound === undefined || categoryFound === '') {
+      throw new BadRequestError('Mauvaise requête', "Le champ categorie n'est pas renseigné ❌");
+    }
     const product = {
       id: request.params.id,
       idCity: request.body.idCity,
@@ -137,11 +168,9 @@ module.exports = {
       )
         return response.status(OK).json({
         message: 'Le produit a bien été modifié 👍', 
-        productUpdated: product.idCity, 
-        productUpdated: product.idCategory, 
-        productUpdated: product.name, 
-        productUpdated: product.description, 
-        productUpdated: product.price
+        nameUpdated: product.name, 
+        descriptionUpdated: product.description, 
+        priceUpdated: product.price
       })
     } else if(id === null || id === undefined || id === ''){
       throw new NotFoundError('Erreur de conflit', 'Ce produit n\'existe pas 🙅‍♂️');

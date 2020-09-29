@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { BadRequestError, UnAuthorizedError } = require('../src/helpers/errors');
+const { BadRequestError, UnAuthorizedError } = require('../helpers/errors');
 const secret = process.env.JWT_SIGN_SECRET;
 
 module.exports = {

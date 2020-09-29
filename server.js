@@ -4,7 +4,7 @@ const express = require('express');
 const server = express();
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const routes = require('./routes');
+const routes = require('./src/routes');
 
 // Middleware
 server.use(bodyParser.json());

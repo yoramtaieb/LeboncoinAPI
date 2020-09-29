@@ -24,9 +24,7 @@
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "nodemon app.js",
-        "generate:pattern": "node ./express_mvc_cli/generate.pattern.js",
-        "generate:router": "node ./express_mvc_cli/generate.router.js"
+        "start": "nodemon app.js"
     },
     "repository": {
         "type": "git",

@@ -1,14 +1,12 @@
 const express = require('express');
 require('express-async-errors');
 const bodyParser = require('body-parser');
-
 const router = express.Router();
 const signUpRouter = require('./signUpRouter');
 const signInRouter = require('./signInRouter');
 const productRouter = require('./productRouter')
 const userRouter = require('./userRouter')
-
-const { OK } = require('../src/helpers/status_code');
+const { OK } = require('../../src/helpers/status_code');
 
 router.get('/', (request, response) => {
   response.status(OK).json({ message: 'je suis la page d\'accueil' });

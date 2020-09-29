@@ -2,10 +2,9 @@ const express = require('express');
 require('express-async-errors');
 const productRouter = express.Router();
 const jwt = require('../utils/jwt')
-const {BadRequestError, NotFoundError, ForbiddenError } = require('../src/helpers/errors');
-const { CREATED, OK } = require('../src/helpers/status_code');
-const { addProduct, getAllProduct, getProductByName, getProductByCategories, getProductByCities, updateProduct, deleteProduct } = require('../src/controllers/Product');
-const { request } = require('express');
+const { addProduct, getAllProduct, getProductByName, getProductByCategorieName, getProductByCitieName, updateProduct, deleteProduct } = require('../../src/controllers/Product');
+const {BadRequestError, NotFoundError, ForbiddenError } = require('../helpers/errors');
+const { CREATED, OK } = require('../helpers/status_code');
 const NOSTRING_REGEX = /^\d+$/;
 
 // Récupérer tous les produits
@@ -26,22 +25,22 @@ productRouter.get('/product/:name', async (request, response) => {
   response.status(OK).json(product);
 });
 
-// Récupérer tous les produits d'une catégorie
-productRouter.get('/product/categorie/:idCategory', async (request, response) => {
-  const categorie = await getProductByCategories(request.params.idCategory);
+// Récupérer tous les produits par le nom d'une catégorie
+productRouter.get('/product/categorie/:name', async (request, response) => {
+  const categorie = await getProductByCategorieName(request.params.name);
   if(categorie.length === 0) {
     throw new NotFoundError('Ressource introuvable',"Aucuns produits trouvés 😿");
   }
   response.status(OK).json(categorie);
 });
 
-// Récupérer tous les produits d'une région
-productRouter.get('/product/citie/:idCity', async (request, response) => {
-  const cities = await getProductByCities(request.params.idCity);
-  if(cities.length === 0) {
+// Récupérer tous les produits par le nom d'une région
+productRouter.get('/product/citie/:name', async (request, response) => {
+  const citie = await getProductByCitieName(request.params.name);
+  if(citie.length === 0) {
     throw new NotFoundError('Ressource introuvable',"Aucuns produits trouvés 😿");
   }
-  response.status(OK).json(cities);
+  response.status(OK).json(citie);
 });
 
 // Ajouter un produit
