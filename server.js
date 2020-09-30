@@ -5,10 +5,12 @@ const server = express();
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const routes = require('./src/routes');
+const cors = require('cors')
 
 // Middleware
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
+server.use(cors())
 
 // Ici on appelle les routes du dossier routes
 server.use(morgan('dev'));

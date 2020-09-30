@@ -26,8 +26,8 @@ userRouter.get('/users/:id', async (request, response)=>{
 })
 
 // Modifier un utilisateur
-userRouter.patch('/user/edit/:id',  updateUser)
-//jwt.authenticateJWT,
+userRouter.patch('/user/edit/:id', jwt.authenticateJWT, updateUser)
+
 // Supprimer un utilisateur
 userRouter.delete('/user/delete/:id', jwt.authenticateJWT, deleteUser)
 
