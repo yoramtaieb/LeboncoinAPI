@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Products', {
+    await queryInterface.createTable("Products", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -13,19 +13,19 @@ module.exports = {
         references: {
           allowNull: false,
           model: {
-            tableName: 'Users',
+            tableName: "Users",
           },
-          key: 'id',
+          key: "id",
         },
       },
-      idCategory:{
+      idCategory: {
         type: Sequelize.INTEGER,
         references: {
           allowNull: false,
           model: {
-            tableName: 'Categories',
+            tableName: "Categories",
           },
-          key: 'id',
+          key: "id",
         },
       },
       idCity: {
@@ -33,31 +33,35 @@ module.exports = {
         references: {
           allowNull: false,
           model: {
-            tableName: 'Cities',
+            tableName: "Cities",
           },
-          key: 'id',
+          key: "id",
         },
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       description: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       price: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+      },
+      uploadPicture: {
+        allowNull: false,
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Products');
-  }
+    await queryInterface.dropTable("Products");
+  },
 };
