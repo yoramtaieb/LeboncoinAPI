@@ -1,9 +1,9 @@
-const { FORBIDDEN } = require('../status_code');
+const { FORBIDDEN } = require("../status_code");
 
 module.exports = class ForbiddenError extends Error {
   constructor(
-    title = 'Accès interdit',
-    description = "Vous n'êtes pas autorisé à accéder à cette ressource ❌",
+    title = "Accès interdit",
+    description = "Vous n'êtes pas autorisé à accéder à cette ressource.",
     ...params
   ) {
     super(...params);

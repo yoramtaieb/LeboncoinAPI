@@ -16,6 +16,7 @@ const { OK, CREATED } = require("../helpers/status_code");
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const PASSWORD_REGEX = /^(?=.*\d).{4,8}$/;
 const FIRSTNAME_REGEX = /^[a-zA-Z]{1,}$/;
+const { checkPassword } = require("../utils/password");
 
 const userAttributes = [
   "id",
@@ -40,25 +41,25 @@ module.exports = {
     if (firstName === null || firstName === undefined || firstName === "") {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Le champs firstName n'est pas renseigne 😿"
+        "Le prénom n'est pas renseigné."
       );
     }
     if (!FIRSTNAME_REGEX.test(firstName)) {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Le champs firstName doit être une chaîne de caractère 👆"
+        "Le prénom doit être une chaîne de caractère."
       );
     }
     if (!EMAIL_REGEX.test(email)) {
       throw new BadRequestError(
         "Mauvaise requête",
-        "L'email n'est pas valide 😿"
+        "L'email n'est pas valide."
       );
     }
     if (!PASSWORD_REGEX.test(password)) {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Mot de passe invalide 😿 (doit avoir une longueur de 4 à 8 caractère et inclure au moins 1 chiffre)"
+        "Mot de passe invalide (doit avoir une longueur de 4 à 8 caractère et inclure au moins 1 chiffre)."
       );
     } else {
       const userFound = await User.findOne({
@@ -80,7 +81,7 @@ module.exports = {
       } else {
         throw new ConflictError(
           "Erreur de conflit",
-          "Un utilisateur utilisant cette adresse email est déjà enregistré 🙆‍♂️"
+          "Un utilisateur utilisant cette adresse email est déjà enregistré."
         );
       }
     }
@@ -91,7 +92,7 @@ module.exports = {
     if (email === "" || password === "") {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Les champs ne sont pas renseignés 😿"
+        "Les champs ne sont pas renseignés."
       );
     } else {
       const userFound = await User.findOne({
@@ -100,28 +101,27 @@ module.exports = {
         },
       });
       if (userFound) {
-        bcrypt.compare(password, userFound.password, (error, resByScript) => {
-          if (resByScript) {
-            response.status(OK).json({
-              token: jwtUtils.genToken(userFound),
-              user: {
-                email: userFound.email,
-                firstName: userFound.firstName,
-                lastName: userFound.lastName,
-                role: userFound.role,
-              },
-            });
-          } else {
-            throw new UnAuthorizedError(
-              "Accès non autorisé",
-              "Votre mot de passe n'est pas correct 👆"
-            );
-          }
-        });
+        const isIdentified = await checkPassword(password, userFound.password);
+        if (isIdentified) {
+          response.status(OK).json({
+            token: jwtUtils.genToken(userFound),
+            user: {
+              firstName: userFound.firstName,
+              lastName: userFound.lastName,
+              email: userFound.email,
+              role: userFound.role,
+            },
+          });
+        } else {
+          throw new UnAuthorizedError(
+            "Accès refusé",
+            "Votre mot de passe n'est pas correct, veuillez recommencer."
+          );
+        }
       } else {
         throw new ServerError(
           "Erreur serveur",
-          "Impossible de vérifier cet utilisateur 😿"
+          "Impossible de vérifier cet utilisateur."
         );
       }
     }
@@ -164,13 +164,13 @@ module.exports = {
     if (email === null || email === undefined || email === "") {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Le champ email n'est pas renseigné ❌"
+        "L'email n'est pas renseigné."
       );
     }
     if (password === null || password === undefined || password === "") {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Le champ password n'est pas renseigné ❌"
+        "Le mot de passe n'est pas renseigné."
       );
     }
     const isFounded = await model.User.findOne({
@@ -193,7 +193,7 @@ module.exports = {
           }
         );
         return response.status(OK).json({
-          message: `Votre profil a bien été mis à jour 👍`,
+          message: `Votre profil a bien été mis à jour.`,
           emailUpdated: user.email,
           passwordUpdated: user.password,
         });
@@ -201,7 +201,7 @@ module.exports = {
     } else if (id === null || id === undefined || id === "") {
       throw new NotFoundError(
         "Erreur de conflit",
-        "Cet utilisateur n'existe pas 🙅‍♂️"
+        "Cet utilisateur n'existe pas."
       );
     }
   },
@@ -218,7 +218,7 @@ module.exports = {
     };
     if (!user.id) {
       response.status(UNAUTHORIZED).json({
-        error: "Vous n'êtes pas autorisé à accéder à cette ressource",
+        error: "Vous n'êtes pas autorisé à accéder à cette ressource.",
       });
     }
     const isFounded = await model.User.findOne({
@@ -233,13 +233,13 @@ module.exports = {
         },
       });
       return response.status(OK).json({
-        message: "Votre compte a bien été supprimé 👍",
+        message: "Votre compte a bien été supprimé.",
         userDeleted: user.id,
       });
     } else if (id === null || id === undefined || id === "") {
       throw new NotFoundError(
         "Erreur de conflit",
-        "Cet utilisateur n'existe pas 🙅‍♂️"
+        "Cet utilisateur n'existe pas."
       );
     }
   },
