@@ -21,16 +21,7 @@ const { CREATED, OK } = require("../helpers/status_code");
 const NOSTRING_REGEX = /^\d+$/;
 
 // Récupérer tous les produits
-productRouter.get("/product", async (request, response) => {
-  const product = await getAllProduct();
-  if (product.length === 0) {
-    throw new NotFoundError(
-      "Ressource introuvable",
-      "Aucuns produits trouvés 😿"
-    );
-  }
-  response.status(OK).json(product);
-});
+productRouter.get("/product", getAllProduct);
 
 // Récupérer un produit par le nom
 productRouter.get("/product/:name", async (request, response) => {
@@ -74,21 +65,24 @@ productRouter.post(
   jwt.authenticateJWT,
   upload,
   async (request, response) => {
+    console.log("body", request.body);
+    console.log("name", request.body.name);
     const { name, description, price } = request.body;
     const { userRole } = request.user;
+    // console.log(request.user);
     if (userRole === "Acheteur") {
       throw new ForbiddenError();
     }
     if (!NOSTRING_REGEX.test(price)) {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Le champ doit être un nombre entier ❌"
+        "Le champ price doit être un nombre entier"
       );
     }
     if (name === null || name === undefined || name === "") {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Le champ name n'est pas renseigné ❌"
+        "Le champ name n'est pas renseigné"
       );
     }
     if (
@@ -98,17 +92,19 @@ productRouter.post(
     ) {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Le champ description n'est pas renseigné ❌"
+        "Le champ description n'est pas renseigné"
       );
     }
     const host = request.get("host");
+    console.log("file", request.file);
     const { filename } = request.file;
     const productAdd = {
       ...request.body,
       uploadPicture: `${request.protocol}://${host}/uploads/${filename}`,
     };
-    console.log("je suis le console log: ", productAdd);
-    const newProduct = await addProduct(productAdd);
+    // console.log("je suis le console log: ", productAdd);
+    console.log(request.user.userId);
+    const newProduct = await addProduct(productAdd, request.user.userId);
     return response.status(CREATED).json(newProduct);
   }
 );

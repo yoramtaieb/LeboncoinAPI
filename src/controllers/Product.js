@@ -2,35 +2,31 @@ const express = require("express");
 require("express-async-errors");
 const models = require("../../models");
 const { Product, User, Cities, Categories } = require("../../models");
-const { getCityByName } = require("../../src/controllers/Cities");
-const { getCategorieByName } = require("../../src/controllers/Categories");
-const { getUserByName } = require("../../src/controllers/User");
+
 const jwt = require("../utils/jwt");
-const { UNAUTHORIZED, OK } = require("../../src/helpers/status_code");
+const { UNAUTHORIZED, OK, CREATED } = require("../../src/helpers/status_code");
 const {
   ForbiddenError,
   NotFoundError,
   BadRequestError,
 } = require("../../src/helpers/errors");
+const { getCityById } = require("./Cities");
+const { getCategorieById } = require("./Categories");
 
 const productAttributes = ["name", "description", "price", "uploadPicture"];
 
 module.exports = {
   // Ajouter un produit
-  addProduct: async (data) => {
-    const userFound = await getUserByName(data.user);
-    const cityFound = await getCityByName(data.city);
-    const categoryFound = await getCategorieByName(data.categorie);
-    if (userFound === null || userFound === undefined || userFound === "") {
-      throw new BadRequestError(
-        "Mauvaise requête",
-        "Le champ user n'est pas renseigné ❌"
-      );
-    }
+  addProduct: async (data, userId) => {
+    console.log("data", data);
+    const cityFound = await getCityById(data.idCity);
+    const categoryFound = await getCategorieById(data.idCategory);
+    console.log(cityFound);
+    console.log(categoryFound);
     if (cityFound === null || cityFound === undefined || cityFound === "") {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Le champ city n'est pas renseigné ❌"
+        "Le champ ville n'est pas renseigné"
       );
     }
     if (
@@ -40,12 +36,12 @@ module.exports = {
     ) {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Le champ categorie n'est pas renseigné ❌"
+        "Le champ categorie n'est pas renseigné"
       );
     }
     const { name, description, price, uploadPicture } = data;
     const newProduct = await Product.create({
-      idUser: userFound.id,
+      idUser: userId,
       idCity: cityFound.id,
       idCategory: categoryFound.id,
       name,
@@ -53,6 +49,7 @@ module.exports = {
       price,
       uploadPicture,
     });
+    console.log("tutu");
 
     const products = await Product.findByPk(newProduct.id, {
       attributes: productAttributes,
@@ -76,7 +73,16 @@ module.exports = {
 
   // Récupérer tous les produits
   getAllProduct: async (request, response) => {
-    return await Product.findAll({
+    const where = {};
+    if (request.query.categorie) {
+      const categorieFound = await Categories.findOne({
+        where: { name: request.query.categorie },
+        attributes: ["id"],
+        raw: true,
+      });
+      where.idCategory = categorieFound.id;
+    }
+    const findProduct = await Product.findAll({
       attributes: productAttributes,
       include: [
         {
@@ -92,7 +98,15 @@ module.exports = {
           attributes: ["name"],
         },
       ],
+      where,
     });
+    if (findProduct.length === 0) {
+      throw new NotFoundError(
+        "Ressource introuvable",
+        "Aucuns produits trouvés"
+      );
+    }
+    response.status(CREATED).json(findProduct);
   },
 
   // Récupérer un produit par le nom
