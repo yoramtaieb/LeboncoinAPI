@@ -1,7 +1,8 @@
 const express = require("express");
-require("express-async-errors");
 const productRouter = express.Router();
+require("express-async-errors");
 const jwt = require("../utils/jwt");
+const bodyParser = require("body-parser");
 const {
   addProduct,
   getAllProduct,
@@ -65,26 +66,47 @@ productRouter.post(
   jwt.authenticateJWT,
   upload,
   async (request, response) => {
-    console.log("body", request.body);
-    console.log("name", request.body.name);
-    const { name, description, price } = request.body;
+    const {
+      idCity,
+      idCategory,
+      name,
+      description,
+      price,
+      uploadPicture,
+    } = request.body;
     const { userRole } = request.user;
-    // console.log(request.user);
     if (userRole === "Acheteur") {
       throw new ForbiddenError();
     }
-    if (!NOSTRING_REGEX.test(price)) {
+    // if (
+    //   uploadPicture === null ||
+    //   uploadPicture === undefined ||
+    //   uploadPicture === ""
+    // ) {
+    //   throw new BadRequestError(
+    //     "Mauvaise requête",
+    //     "Merci de renseigner une image"
+    //   );
+    // }
+    if (idCity === null || idCity === undefined || idCity === "") {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Le champ price doit être un nombre entier"
+        "Le champ ville n'est pas renseigné"
+      );
+    }
+    if (idCategory === null || idCategory === undefined || idCategory === "") {
+      throw new BadRequestError(
+        "Mauvaise requête",
+        "Le champ catégorie n'est pas renseigné"
       );
     }
     if (name === null || name === undefined || name === "") {
       throw new BadRequestError(
         "Mauvaise requête",
-        "Le champ name n'est pas renseigné"
+        "Le champ nom n'est pas renseigné"
       );
     }
+   
     if (
       description === null ||
       description === undefined ||
@@ -95,15 +117,25 @@ productRouter.post(
         "Le champ description n'est pas renseigné"
       );
     }
+    if (!NOSTRING_REGEX.test(price)) {
+      throw new BadRequestError(
+        "Mauvaise requête",
+        "Le champ prix n'est pas renseigné"
+      );
+    }
+
     const host = request.get("host");
-    console.log("file", request.file);
     const { filename } = request.file;
+    if (filename === null || filename === undefined || filename === "") {
+      throw new BadRequestError(
+        "Mauvaise requête",
+        "Merci de renseigner une image"
+      );
+    }
     const productAdd = {
       ...request.body,
       uploadPicture: `${request.protocol}://${host}/uploads/${filename}`,
     };
-    // console.log("je suis le console log: ", productAdd);
-    console.log(request.user.userId);
     const newProduct = await addProduct(productAdd, request.user.userId);
     return response.status(CREATED).json(newProduct);
   }

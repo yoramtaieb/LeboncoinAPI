@@ -17,6 +17,7 @@ const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"
 const PASSWORD_REGEX = /^(?=.*\d).{4,8}$/;
 const FIRSTNAME_REGEX = /^[a-zA-Z]{1,}$/;
 const { checkPassword } = require("../utils/password");
+const { response } = require("express");
 
 const userAttributes = [
   "id",
@@ -106,10 +107,12 @@ module.exports = {
           response.status(OK).json({
             token: jwtUtils.genToken(userFound),
             user: {
+              id: userFound.id,
               firstName: userFound.firstName,
               lastName: userFound.lastName,
               email: userFound.email,
               role: userFound.role,
+             
             },
           });
         } else {
@@ -129,10 +132,18 @@ module.exports = {
 
   // Récupérer tous les utilisateurs
   getAllUsers: async (request, response) => {
-    return await User.findAll({
-      attributes: userAttributes,
+    const { id } = request.body
+    return await User.findOne({
+      where: { id },
     });
   },
+
+  // getUserSeller: async(request, response)=>{
+  //   const {id, role } = request.body
+  //   return await User.findOne({
+  //     where: { id, role: 'Vendeur' },
+  //   });
+  // },
 
   // Récupérer tous les utilisateurs par le nom
   getUserByName: async (firstName) => {

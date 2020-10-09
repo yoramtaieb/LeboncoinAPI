@@ -13,32 +13,29 @@ const {
 const { getCityById } = require("./Cities");
 const { getCategorieById } = require("./Categories");
 
-const productAttributes = ["name", "description", "price", "uploadPicture"];
+const productAttributes = ["name", "description", "price", "uploadPicture", "createdAt", "updatedAt"];
 
 module.exports = {
   // Ajouter un produit
   addProduct: async (data, userId) => {
-    console.log("data", data);
     const cityFound = await getCityById(data.idCity);
     const categoryFound = await getCategorieById(data.idCategory);
-    console.log(cityFound);
-    console.log(categoryFound);
-    if (cityFound === null || cityFound === undefined || cityFound === "") {
-      throw new BadRequestError(
-        "Mauvaise requête",
-        "Le champ ville n'est pas renseigné"
-      );
-    }
-    if (
-      categoryFound === null ||
-      categoryFound === undefined ||
-      categoryFound === ""
-    ) {
-      throw new BadRequestError(
-        "Mauvaise requête",
-        "Le champ categorie n'est pas renseigné"
-      );
-    }
+    // if (cityFound === null || cityFound === undefined || cityFound === "") {
+    //   throw new BadRequestError(
+    //     "Mauvaise requête",
+    //     "Le champ ville n'est pas renseigné"
+    //   );
+    // }
+    // if (
+    //   categoryFound === null ||
+    //   categoryFound === undefined ||
+    //   categoryFound === ""
+    // ) {
+    //   throw new BadRequestError(
+    //     "Mauvaise requête",
+    //     "Le champ catégorie n'est pas renseigné"
+    //   );
+    // }
     const { name, description, price, uploadPicture } = data;
     const newProduct = await Product.create({
       idUser: userId,
@@ -49,8 +46,6 @@ module.exports = {
       price,
       uploadPicture,
     });
-    console.log("tutu");
-
     const products = await Product.findByPk(newProduct.id, {
       attributes: productAttributes,
       include: [
@@ -83,6 +78,8 @@ module.exports = {
       where.idCategory = categorieFound.id;
     }
     const findProduct = await Product.findAll({
+      limit: 8,
+      order: [["createdAt", "DESC"]],
       attributes: productAttributes,
       include: [
         {
