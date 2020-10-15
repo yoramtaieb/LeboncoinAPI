@@ -4,7 +4,7 @@ const { Categories } = db;
 module.exports = {
   getCategorieById: (id) => {
     return Categories.findByPk(id, {
-      attributes: ["id", "name"],
+      attributes: ["name"],
     });
   },
 
@@ -12,5 +12,12 @@ module.exports = {
     return Categories.findOne({
       where: { name: name },
     });
+  },
+
+  getAllCategories: async () => {
+    const allCategories = await Categories.findAll({
+      attributes: ["id", "name"],
+    });
+    return allCategories;
   },
 };

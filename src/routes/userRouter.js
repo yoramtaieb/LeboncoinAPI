@@ -3,14 +3,16 @@ const userRouter = express.Router();
 require("express-async-errors");
 const jwt = require("../utils/jwt");
 const bodyParser = require("body-parser");
-const { User } = require('../../models')
+const { User } = require("../../models");
 const {
   getUserById,
   updateUser,
   deleteUser,
+  deleteSeller,
 } = require("../../src/controllers/User");
 const { OK } = require("../helpers/status_code");
 const { NotFoundError } = require("../../src/helpers/errors");
+const { response } = require("express");
 
 userRouter.get("/user/me", jwt.authenticateJWT, async (request, response) => {
   const user = await User.findByPk(request.user.userId);
@@ -18,14 +20,8 @@ userRouter.get("/user/me", jwt.authenticateJWT, async (request, response) => {
 });
 
 // Récupérer tous les utilisateurs
-userRouter.get("/user", async (request, response) => {
+userRouter.get("/user/:id", async (request, response) => {
   const users = await getUserById();
-  if (users.length === 0) {
-    throw new NotFoundError(
-      "Ressource introuvable",
-      "Aucuns utilisateurs trouvés"
-    );
-  }
   response.status(OK).json(users);
 });
 
@@ -42,9 +38,16 @@ userRouter.get("/users/:id", async (request, response) => {
 });
 
 // Modifier un utilisateur
-userRouter.patch("/user/edit/:id", jwt.authenticateJWT, updateUser);
+userRouter.put("/user/edit/:id", updateUser);
+// jwt.authenticateJWT,
 
-// Supprimer un utilisateur
-userRouter.delete("/user/delete/:id", jwt.authenticateJWT, deleteUser);
+userRouter.delete(
+  "/user/delete/:id",
+  jwt.authenticateJWT,
+  async (request, response) => {
+    const userDeleted = await deleteUser(request.params.id, request.params.id);
+    response.status(OK).json(userDeleted);
+  }
+);
 
 module.exports = userRouter;

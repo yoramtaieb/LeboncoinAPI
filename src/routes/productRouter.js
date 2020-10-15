@@ -22,18 +22,23 @@ const { CREATED, OK } = require("../helpers/status_code");
 const NOSTRING_REGEX = /^\d+$/;
 
 // Récupérer tous les produits
-productRouter.get("/product", getAllProduct);
+productRouter.get("/product", async (request, response) => {
+  const product = await getAllProduct();
+  console.log(product);
+  response.status(OK).json(product);
+});
 
 // Récupérer un produit par le nom
 productRouter.get("/product/:name", async (request, response) => {
-  const product = await getProductByName(request.params.name);
-  if (!product) {
+  const products = await getProductByName(request.params.name);
+  if (!products) {
     throw new NotFoundError(
       "Ressource introuvable",
       "Ce produit n'existe pas 😿"
     );
   }
-  response.status(OK).json(product);
+
+  return response.status(OK).json(products);
 });
 
 // Récupérer tous les produits par le nom d'une catégorie
@@ -66,39 +71,10 @@ productRouter.post(
   jwt.authenticateJWT,
   upload,
   async (request, response) => {
-    const {
-      idCity,
-      idCategory,
-      name,
-      description,
-      price,
-      uploadPicture,
-    } = request.body;
+    const { name, description, price, idCategory, idCity } = request.body;
     const { userRole } = request.user;
     if (userRole === "Acheteur") {
       throw new ForbiddenError();
-    }
-    // if (
-    //   uploadPicture === null ||
-    //   uploadPicture === undefined ||
-    //   uploadPicture === ""
-    // ) {
-    //   throw new BadRequestError(
-    //     "Mauvaise requête",
-    //     "Merci de renseigner une image"
-    //   );
-    // }
-    if (idCity === null || idCity === undefined || idCity === "") {
-      throw new BadRequestError(
-        "Mauvaise requête",
-        "Le champ ville n'est pas renseigné"
-      );
-    }
-    if (idCategory === null || idCategory === undefined || idCategory === "") {
-      throw new BadRequestError(
-        "Mauvaise requête",
-        "Le champ catégorie n'est pas renseigné"
-      );
     }
     if (name === null || name === undefined || name === "") {
       throw new BadRequestError(
@@ -106,7 +82,6 @@ productRouter.post(
         "Le champ nom n'est pas renseigné"
       );
     }
-   
     if (
       description === null ||
       description === undefined ||
@@ -123,7 +98,6 @@ productRouter.post(
         "Le champ prix n'est pas renseigné"
       );
     }
-
     const host = request.get("host");
     const { filename } = request.file;
     if (filename === null || filename === undefined || filename === "") {
@@ -142,9 +116,31 @@ productRouter.post(
 );
 
 // Modifier un produit
-productRouter.patch("/product/edit/:id", jwt.authenticateJWT, updateProduct);
+// productRouter.patch("/product/edit/:id", jwt.authenticateJWT, updateProduct);
 
 // Supprimer un produit
-productRouter.delete("/product/delete/:id", jwt.authenticateJWT, deleteProduct);
+productRouter.delete(
+  "/product/delete/:id",
+  jwt.authenticateJWT,
+  async (request, response) => {
+    const { userRole } = request.user;
+    if (userRole === "Acheteur") {
+      throw new ForbiddenError();
+    }
+    await deleteProduct(request.params.id);
+    response.status(OK).json({ message: "L'annonce de livre a été supprimé" });
+  }
+);
+
+// productRouter.get("/categories/all", async (request, response) => {
+//   const allCategories = await getAllCategories();
+//   response.status(OK).json(allCategories);
+// });
+
+// productRouter.get("/cities/all", async (request, response) => {
+//   const allCities = await getAllCities();
+
+//   response.status(OK).json(allCities);
+// });
 
 module.exports = productRouter;

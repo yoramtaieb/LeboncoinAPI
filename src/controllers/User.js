@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const model = require("../../models");
 const jwtUtils = require("../utils/jwt");
 const User = model.User;
+const Product = model.Product;
 const {
   BadRequestError,
   ConflictError,
@@ -27,6 +28,8 @@ const userAttributes = [
   "password",
   "birthday",
   "role",
+  "createdAt",
+  "updatedAt",
 ];
 
 module.exports = {
@@ -112,7 +115,8 @@ module.exports = {
               lastName: userFound.lastName,
               email: userFound.email,
               role: userFound.role,
-             
+              createdAt: userFound.createdAt,
+              updatedAt: userFound.updatedAt,
             },
           });
         } else {
@@ -132,18 +136,12 @@ module.exports = {
 
   // Récupérer tous les utilisateurs
   getAllUsers: async (request, response) => {
-    const { id } = request.body
+    const { id } = request.body;
     return await User.findOne({
+      order: [["createdAt", "updatedAt"]],
       where: { id },
     });
   },
-
-  // getUserSeller: async(request, response)=>{
-  //   const {id, role } = request.body
-  //   return await User.findOne({
-  //     where: { id, role: 'Vendeur' },
-  //   });
-  // },
 
   // Récupérer tous les utilisateurs par le nom
   getUserByName: async (firstName) => {
@@ -161,17 +159,20 @@ module.exports = {
 
   // Modifier un utilisateur
   updateUser: async (request, response) => {
-    const { id, email, password } = request.body;
-    // city
-    const { userRole } = request.user;
-    if (userRole === "Acheteur") {
-      throw new ForbiddenError();
+    const { firstName, lastName, email, password } = request.body;
+    const userId = request.params.id;
+    if (firstName === null || firstName === undefined || firstName === "") {
+      throw new BadRequestError(
+        "Mauvaise requête",
+        "Le prénom n'est pas renseigné."
+      );
     }
-    const user = {
-      id: request.params.id,
-      email: request.body.email,
-      password: request.body.password,
-    };
+    if (lastName === null || lastName === undefined || lastName === "") {
+      throw new BadRequestError(
+        "Mauvaise requête",
+        "Le nom n'est pas renseigné."
+      );
+    }
     if (email === null || email === undefined || email === "") {
       throw new BadRequestError(
         "Mauvaise requête",
@@ -184,74 +185,28 @@ module.exports = {
         "Le mot de passe n'est pas renseigné."
       );
     }
-    const isFounded = await model.User.findOne({
-      where: {
-        id: user.id,
-      },
-    });
-    if (isFounded) {
-      bcrypt.hash(user.password, 5, async (err, hash) => {
-        user.password = hash;
-        await model.User.update(
-          {
-            email: user.email,
-            password: user.password,
-          },
-          {
-            where: {
-              id: user.id,
-            },
-          }
-        );
-        return response.status(OK).json({
-          message: `Votre profil a bien été mis à jour.`,
-          emailUpdated: user.email,
-          passwordUpdated: user.password,
-        });
+    bcrypt.hash(request.body.password, 5, async (err, hash) => {
+      request.body.password = hash;
+      const newData = request.body;
+      newData.id = userId;
+      await User.update(newData, {
+        where: {
+          id: userId,
+        },
+        raw: true,
+        attributes: ["firstName", "lastName", "email", "password"],
       });
-    } else if (id === null || id === undefined || id === "") {
-      throw new NotFoundError(
-        "Erreur de conflit",
-        "Cet utilisateur n'existe pas."
-      );
-    }
+      return response.status(OK).json(newData);
+    });
   },
 
   // Supprimer un utilisateur
-  deleteUser: async (request, response) => {
-    const { id } = request.body;
-    const { userRole } = request.user;
-    if (userRole === "Acheteur") {
-      throw new ForbiddenError();
-    }
-    const user = {
-      id: request.params.id,
-    };
-    if (!user.id) {
-      response.status(UNAUTHORIZED).json({
-        error: "Vous n'êtes pas autorisé à accéder à cette ressource.",
-      });
-    }
-    const isFounded = await model.User.findOne({
-      where: {
-        id: user.id,
-      },
+  deleteUser: (idUser, id) => {
+    Product.destroy({
+      where: { idUser },
     });
-    if (isFounded) {
-      await model.User.destroy({
-        where: {
-          id: user.id,
-        },
-      });
-      return response.status(OK).json({
-        message: "Votre compte a bien été supprimé.",
-        userDeleted: user.id,
-      });
-    } else if (id === null || id === undefined || id === "") {
-      throw new NotFoundError(
-        "Erreur de conflit",
-        "Cet utilisateur n'existe pas."
-      );
-    }
+    User.destroy({
+      where: { id },
+    });
   },
 };

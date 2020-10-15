@@ -4,7 +4,7 @@ const { Cities } = db;
 module.exports = {
   getCityById: (id) => {
     return Cities.findByPk(id, {
-      attributes: ["id", "name"],
+      attributes: ["name"],
     });
   },
 
@@ -12,5 +12,12 @@ module.exports = {
     return Cities.findOne({
       where: { name: name },
     });
+  },
+
+  getAllCities: async () => {
+    const allCities = await Cities.findAll({
+      attributes: ["id", "name"],
+    });
+    return allCities;
   },
 };
