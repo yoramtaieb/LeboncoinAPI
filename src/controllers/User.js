@@ -126,9 +126,9 @@ module.exports = {
           );
         }
       } else {
-        throw new ServerError(
-          "Erreur serveur",
-          "Impossible de vérifier cet utilisateur."
+        throw new UnAuthorizedError(
+          "Accès refusé",
+          "L’e-mail entré ne correspond à aucun compte. Veuillez créer un compte."
         );
       }
     }

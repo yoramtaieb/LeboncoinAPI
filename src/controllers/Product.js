@@ -1,18 +1,8 @@
 const express = require("express");
 require("express-async-errors");
-const models = require("../../models");
 const { Product, User, Cities, Categories } = require("../../models");
 const fs = require("fs");
-const jwt = require("../utils/jwt");
-const { UNAUTHORIZED, OK, CREATED } = require("../../src/helpers/status_code");
-const {
-  ForbiddenError,
-  NotFoundError,
-  BadRequestError,
-} = require("../../src/helpers/errors");
-const { getCityById } = require("./Cities");
-const { getCategorieById } = require("./Categories");
-const { response } = require("express");
+const { NotFoundError } = require("../../src/helpers/errors");
 
 const deleteImage = async (productFound) => {
   const [, filename] = productFound.uploadPicture.split("/uploads/");
@@ -70,7 +60,6 @@ module.exports = {
       limit: 8,
       order: [["createdAt", "DESC"]],
       raw: true,
-      // attributes: productAttributes,
       include: [
         {
           model: User,
@@ -85,7 +74,6 @@ module.exports = {
           attributes: ["name"],
         },
       ],
-      // where,
     });
     if (findProduct.length === 0) {
       throw new NotFoundError(
@@ -110,10 +98,14 @@ module.exports = {
       include: [
         {
           model: Categories,
-          attributes: ["name"],
+          attributes: ["id", "name"],
           where: {
             name: name,
           },
+        },
+        {
+          model: Cities,
+          attributes: ["id", "name"],
         },
       ],
     });

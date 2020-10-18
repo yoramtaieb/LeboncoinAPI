@@ -9,7 +9,7 @@ const {
   getProductByName,
   getProductByCategorieName,
   getProductByCitieName,
-  updateProduct,
+  // updateProduct,
   deleteProduct,
 } = require("../../src/controllers/Product");
 const { upload } = require("../middlewares");
@@ -47,7 +47,7 @@ productRouter.get("/product/categorie/:name", async (request, response) => {
   if (categorie.length === 0) {
     throw new NotFoundError(
       "Ressource introuvable",
-      "Aucuns produits trouvés 😿"
+      "Aucuns produits répertoriés"
     );
   }
   response.status(OK).json(categorie);
@@ -57,10 +57,7 @@ productRouter.get("/product/categorie/:name", async (request, response) => {
 productRouter.get("/product/citie/:name", async (request, response) => {
   const citie = await getProductByCitieName(request.params.name);
   if (citie.length === 0) {
-    throw new NotFoundError(
-      "Ressource introuvable",
-      "Aucuns produits trouvés 😿"
-    );
+    throw new NotFoundError("Ressource introuvable", "Aucuns produits trouvés");
   }
   response.status(OK).json(citie);
 });
@@ -131,16 +128,5 @@ productRouter.delete(
     response.status(OK).json({ message: "L'annonce de livre a été supprimé" });
   }
 );
-
-// productRouter.get("/categories/all", async (request, response) => {
-//   const allCategories = await getAllCategories();
-//   response.status(OK).json(allCategories);
-// });
-
-// productRouter.get("/cities/all", async (request, response) => {
-//   const allCities = await getAllCities();
-
-//   response.status(OK).json(allCities);
-// });
 
 module.exports = productRouter;
