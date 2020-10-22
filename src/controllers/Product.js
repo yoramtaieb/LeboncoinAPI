@@ -122,6 +122,10 @@ module.exports = {
             name: name,
           },
         },
+        {
+          model: Categories,
+          attributes: ["id", "name"],
+        },
       ],
     });
   },
