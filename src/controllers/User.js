@@ -33,15 +33,8 @@ const userAttributes = [
 ];
 
 module.exports = {
-  signUp: async (request, response) => {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      birthday,
-      role,
-    } = request.body;
+  signUp: async (props) => {
+    const { firstName, lastName, email, password, birthday, role } = props;
     if (firstName === null || firstName === undefined || firstName === "") {
       throw new BadRequestError(
         "Mauvaise requête",
@@ -71,16 +64,14 @@ module.exports = {
         where: { email: email },
       });
       if (userFound === null) {
-        bcrypt.hash(password, 5, async (error, bcryptPassword) => {
-          const newUser = await User.create({
-            firstName,
-            lastName,
-            email,
-            password: bcryptPassword,
-            birthday,
-            role,
-          });
-          response.status(CREATED).json(newUser);
+        const checkPassword = await bcrypt.hash(password, 10);
+        return User.create({
+          firstName,
+          lastName,
+          email,
+          password: checkPassword,
+          birthday,
+          role,
         });
       } else {
         throw new ConflictError(

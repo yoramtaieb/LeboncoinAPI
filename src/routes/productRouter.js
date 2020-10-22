@@ -68,7 +68,7 @@ productRouter.post(
   jwt.authenticateJWT,
   upload,
   async (request, response) => {
-    const { name, description, price, idCategory, idCity } = request.body;
+    const { name, description, price } = request.body;
     const { userRole } = request.user;
     if (userRole === "Acheteur") {
       throw new ForbiddenError();
@@ -97,12 +97,6 @@ productRouter.post(
     }
     const host = request.get("host");
     const { filename } = request.file;
-    if (filename === null || filename === undefined || filename === "") {
-      throw new BadRequestError(
-        "Mauvaise requête",
-        "Merci de renseigner une image"
-      );
-    }
     const productAdd = {
       ...request.body,
       uploadPicture: `${request.protocol}://${host}/uploads/${filename}`,
