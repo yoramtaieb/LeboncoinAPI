@@ -38,13 +38,9 @@ userRouter.get("/users/:id", async (request, response) => {
 });
 
 // Modifier un utilisateur
-userRouter.put("/user/edit/:id", updateUser);
-// jwt.authenticateJWT,
+userRouter.put("/user/edit/:id", jwt.authenticateJWT, updateUser);
 
-userRouter.delete(
-  "/user/delete/:id",
-  jwt.authenticateJWT,
-  async (request, response) => {
+userRouter.delete("/user/delete/:id", jwt.authenticateJWT, async (request, response) => {
     const userDeleted = await deleteUser(request.params.id, request.params.id);
     response.status(OK).json(userDeleted);
   }

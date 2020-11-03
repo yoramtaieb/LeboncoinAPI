@@ -9,7 +9,7 @@ const {
   getProductByName,
   getProductByCategorieName,
   getProductByCitieName,
-  // updateProduct,
+  updateProduct,
   deleteProduct,
 } = require("../../src/controllers/Product");
 const { upload } = require("../middlewares");
@@ -105,9 +105,6 @@ productRouter.post(
     return response.status(CREATED).json(newProduct);
   }
 );
-
-// Modifier un produit
-// productRouter.patch("/product/edit/:id", jwt.authenticateJWT, updateProduct);
 
 // Supprimer un produit
 productRouter.delete(

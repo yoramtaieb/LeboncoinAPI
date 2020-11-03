@@ -9,16 +9,13 @@ const {
   BadRequestError,
   ConflictError,
   UnAuthorizedError,
-  ServerError,
-  NotFoundError,
 } = require("../helpers/errors");
 
-const { OK, CREATED } = require("../helpers/status_code");
+const { OK } = require("../helpers/status_code");
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const PASSWORD_REGEX = /^(?=.*\d).{4,8}$/;
 const FIRSTNAME_REGEX = /^[a-zA-Z]{1,}$/;
 const { checkPassword } = require("../utils/password");
-const { response } = require("express");
 
 const userAttributes = [
   "id",
@@ -39,6 +36,18 @@ module.exports = {
       throw new BadRequestError(
         "Mauvaise requête",
         "Le prénom n'est pas renseigné."
+      );
+    }
+    if (birthday === null || birthday === undefined || birthday === "") {
+      throw new BadRequestError(
+        "Mauvaise requête",
+        "La date de naissance n'est pas renseignée."
+      );
+    }
+    if (role === null || role === undefined || role === "") {
+      throw new BadRequestError(
+        "Mauvaise requête",
+        "Le rôle n'est pas renseigné."
       );
     }
     if (!FIRSTNAME_REGEX.test(firstName)) {

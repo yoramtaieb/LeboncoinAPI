@@ -7,12 +7,11 @@ const morgan = require("morgan");
 const routes = require("./src/routes");
 const cors = require("cors");
 
-server.use("/uploads", express.static((__dirname, "uploads")));
-
 // Middleware
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(cors());
+server.use("/uploads", express.static((__dirname, "uploads")));
 
 // Ici on appelle les routes du dossier routes
 server.use(morgan("dev"));

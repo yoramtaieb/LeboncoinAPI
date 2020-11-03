@@ -8,6 +8,7 @@ const productRouter = require("./productRouter");
 const userRouter = require("./userRouter");
 const categorieRouter = require("./categorieRouter");
 const citieRouter = require("./citieRouter");
+const mailerRouter = require("./mailerRouter");
 const { OK } = require("../../src/helpers/status_code");
 
 router.get("/", (request, response) => {
@@ -21,5 +22,6 @@ router.use(productRouter);
 router.use(userRouter);
 router.use(categorieRouter);
 router.use(citieRouter);
+router.use(mailerRouter);
 
 module.exports = router;
