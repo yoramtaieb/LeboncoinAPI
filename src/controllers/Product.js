@@ -1,10 +1,8 @@
 const express = require("express");
 require("express-async-errors");
 const { Product, User, Cities, Categories } = require("../../models");
-const fs = require("fs");
 const { NotFoundError } = require("../../src/helpers/errors");
-const { getCityById } = require("../controllers/Cities");
-const { getCategorieById } = require("../controllers/Categories");
+const fs = require("fs");
 const deleteImage = async (productFound) => {
   const [, filename] = productFound.uploadPicture.split("/uploads/");
   fs.unlink(`uploads/${filename}`, (error) => {

@@ -9,7 +9,6 @@ const {
   getProductByName,
   getProductByCategorieName,
   getProductByCitieName,
-  updateProduct,
   deleteProduct,
 } = require("../../src/controllers/Product");
 const { upload } = require("../middlewares");
@@ -116,7 +115,7 @@ productRouter.delete(
       throw new ForbiddenError();
     }
     await deleteProduct(request.params.id);
-    response.status(OK).json({ message: "L'annonce de livre a été supprimé" });
+    response.status(OK).json({ message: "Le produit a été supprimé" });
   }
 );
 
